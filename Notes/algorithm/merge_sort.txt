@@ -1,0 +1,20 @@
+int merge_sort(vector<int>&q, int l, int r){
+    if (l>=r) return; 
+    int middle = (l+r) / 2;
+    merge_sort(q,l,middle);
+    merge_sort(q,middle+1,r);
+    
+    static vector<int> w;
+    w.clear();
+    int i =l,j = middle+1;
+    while (i<=middle && j<=r)
+        if (q[i] < q[j]) 
+            w.push_back(q[i++]);
+        else
+            w.push_back(q[j++]);
+            
+    while(i<=middle) w.push_back(q[i++]);
+    while(j<=r) w.push_back(q[j++]);
+    
+    for (i = l,j = 0;j<w.size();j++,i++) q[i] = w[j];
+}
