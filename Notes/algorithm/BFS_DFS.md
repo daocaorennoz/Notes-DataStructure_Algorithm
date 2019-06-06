@@ -24,94 +24,199 @@ BFS
 ## DFS的例子
 
 - LeetCode 784. Letter Case Permutation Easy
-  
-  ```python
-  # Given a string S, we can transform every letter individually to be lowercase or uppercase to create another string. Return a list of all possible strings we could create.
-  #Examples:Input: S = "a1b2" Output: ["a1b2", "a1B2", "A1b2", "A1B2"]
-  # 技巧：将一个字母大小写变换，可以使用Ascall码来变换，数字在字母之前，小写字母在大写字母之后，大写字母和小写字母只在二进制的第五位有区别，所以可以使用异或第五位的操作来变换。A=65，a=97
-  思路：从前往后遍历，遇到字母则展开分支，一个为小写，一个变大写。则时间复杂度为2^n，n为字母个数。用u来计数遍历次数，当遍历次数达到字符串的长度，则返回结果。
-  class Solution:
-    def letterCasePermutation(self, S: str) -> List[str]:
-        def dfs(S,u):
-            if u == len(S):
-                ans.append(S)
-                return
-            dfs(S,u+1)
-            if S[u]>='A':
-                S=S[0:u]+chr(ord(S[u])^32)+S[u+1:]
-                dfs(S,u+1)
 
-        ans=[]
-        dfs(S,0)
-        return ans
+题意：给定一个字符串S，通过将字符串S中的每个字母转变大小写，我们可以获得一个新的字符串。返回所有可能得到的字符串集合。
+Given a string S, we can transform every letter individually to be lowercase or uppercase to create another string. Return a list of all possible strings we could create.
+    
+    Examples:Input: S = "a1b2" Output: ["a1b2", "a1B2", "A1b2", "A1B2"]
 
-  ```
+思路：将一个字母大小写变换，可以使用Ascall码来变换，数字在字母之前，小写字母在大写字母之后，大写字母和小写字母只在二进制的第五位有区别，所以可以使用异或第五位的操作来变换。A=65，a=97  
+从前往后遍历，遇到字母则展开分支，一个为小写，一个变大写。则时间复杂度为2^n，n为字母个数。用u来计数遍历次数，当遍历次数达到字符串的长度，则返回结果。
+
+```python
+class Solution:
+def letterCasePermutation(self, S: str) -> List[str]:
+    def dfs(S,u):
+        if u == len(S):
+            ans.append(S)
+            return
+        dfs(S,u+1)#向后推进
+        if S[u]>='A':
+            S=S[0:u]+chr(ord(S[u])^32)+S[u+1:]
+            dfs(S,u+1)#将当前位置上的字母改变大小写之后，向后推进
+    ans=[]
+    dfs(S,0)
+    return ans
+```
+
+```cpp
+/*
+    c++中引用传参和传值传参的区别：引用传参（传变量或者指针都是一样的）是将地址或者值穿进去，经过函数内部操作之后，外部的变量也相应变化了，传值传参相当于传进参数的一个副本，只在函数内部起作用，函数运行完之后，外部的变量仍然不变
+    这里的dfs(string &S,int u)，这里需要对S进行修改，所以应该是引用传参。
+*/
+class Solution {
+public:
+    vector<string> res;
+    vector<string> letterCasePermutation(string S) {
+        dfs(S,0);
+        return res;
+    }
+    
+    void dfs(string &S,int u) {
+        if (u == S.size()) {
+            res.push_back(S);
+            return;
+        }
+        dfs(S,u+1);
+        if (S[u] >='A'){
+            S[u] ^= 32;
+            dfs(S,u+1);
+        }
+    }
+    
+};
+```
 
 - LeetCode 77. Combinations Medium
-  
-  ```python
-  # Given two integers n and k, return all possible combinations of k numbers out of 1 ... n.
-  # Input: n = 4, k = 2
-  # Output:[[2,4],[3,4],[2,3],[1,2],[1,3],[1,4],]
-  收获：path和path[:]是两个不一样的东西，如果单纯将path append进去，ans将为空，所以需要将path中存的值放入ans中。path为浅拷贝，path[:]为深拷贝。
-  思路：求组合数，做到不重不漏，指定开始坐标，用k来计数剩余应该取的数字个数，k为0则返回结果。
-  class Solution:
-    def combine(self, n: int, k: int) -> List[List[int]]:
-        ans=[]
-        self.dfs(ans,n,k,1,[])
-        return ans
+
+ 题意：给定两个整数 n 和 k，返回 1 ... n 中所有可能的 k 个数的组合。
+ Given two integers n and k, return all possible combinations of k numbers out of 1 ... n.
+
+    Input: n = 4, k = 2
+    Output:[[2,4],[3,4],[2,3],[1,2],[1,3],[1,4],]
+
+收获：python中path和path[:]是两个不一样的东西，如果单纯将path append进去，ans将为空，所以需要将path中存的值放入ans中。path为浅拷贝，path[:]为深拷贝。
+
+思路：求组合数，做到不重不漏，指定开始坐标，用k来计数剩余应该取的数字个数，k为0则返回结果。
+开始情况，因为题意中是从1到n，不包含0，所以开始坐标得从1开始。
+时间复杂度为$O(C_n^k)$.
+
+```cpp
+class Solution {
+public:
+    vector<vector<int>> res;
+    vector<int> path;
+    vector<vector<int>> combine(int n, int k) {
+        dfs(0,1,n,k);
+        return res;
+    }
     
-    def dfs(self,ans,n,k,start,path):
-        if k==0 and path[:] not in ans:
-            ans.append(path[:])
-            return 
-        for i in range(start,n+1):
-            path.append(i)
-            self.dfs(ans,n,k-1,i+1,path)
-            path.pop()
-            
-  ```
+    void dfs(int u, int start, int n, int k) {
+        if (u == k) {
+            res.push_back(path);
+            return ;
+        }
+        
+        for (int i = start; i<=n ;i++) {
+            path.push_back(i);
+            dfs(u+1,i+1,n,k);
+            path.pop_back();
+        }
+    }
+};
+```
+
+```python
+class Solution:
+def combine(self, n: int, k: int) -> List[List[int]]:
+    ans=[]
+    self.dfs(ans,n,k,1,[])
+    return ans
+
+def dfs(self,ans,n,k,start,path):
+    if k==0 and path[:] not in ans:
+        ans.append(path[:])
+        return 
+    for i in range(start,n+1):
+        path.append(i)
+        self.dfs(ans,n,k-1,i+1,path)
+        path.pop()
+        
+```
 
 - LeetCode 257. Binary Tree Paths Easy
   
-  ```python
-  # Given a binary tree, return all root-to-leaf paths.
-  # Example:
-  # Input:
+题意：给定一个二叉树，返回所有从根节点到叶子节点的路径。
+Given a binary tree, return all root-to-leaf paths
 
-   1
-  /  \
-  2   3
-  \
-  5
+    # Example:
+    # Input:
 
-  Output: ["1->2->5", "1->3"]
+    1
+    /  \
+    2   3
+    \
+    5
 
-  Explanation: All root-to-leaf paths are: 1->2->5, 1->3
-  # Definition for a binary tree node.
-  # class TreeNode:
-  #     def __init__(self, x):
-  #         self.val = x
-  #         self.left = None
-  #         self.right = None
-  收获：涉及到多个dfs的递归的时候，需要注意局部变量的变化。
-  思路：从根节点开始遍历，按左右子树开始分叉，当当前节点为叶子节点时，返回结果。
-    class Solution:
-        def binaryTreePaths(self, root: TreeNode) -> List[str]:
-            ans=[]
-            if not root:
-                return ans
-            self.dfs(ans,root,str(root.val))
+    Output: ["1->2->5", "1->3"]
+
+    Explanation: All root-to-leaf paths are: 1->2->5, 1->3
+
+
+收获：涉及到多个dfs的递归的时候，需要注意局部变量的变化。
+思路：从根节点开始遍历，按左右子树开始分叉，当当前节点为叶子节点时，返回结果。
+
+```python
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Solution:
+    def binaryTreePaths(self, root: TreeNode) -> List[str]:
+        ans=[]
+        if not root:
             return ans
-        def dfs(self,ans,node,path):
-            if node.left:
-                self.dfs(ans,node.left,path+'->'+str(node.left.val))
-            if node.right:
-                self.dfs(ans,node.right,path+'->'+str(node.right.val))
-            if not node.left and not node.right:
-                ans.append(path)
-                return
-  ```
+        self.dfs(ans,root,str(root.val))
+        return ans
+    def dfs(self,ans,node,path):
+        if node.left:
+            self.dfs(ans,node.left,path+'->'+str(node.left.val))
+        if node.right:
+            self.dfs(ans,node.right,path+'->'+str(node.right.val))
+        if not node.left and not node.right:
+            ans.append(path)
+            return
+```
+
+```cpp
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    vector<string> binaryTreePaths(TreeNode* root) {
+        if (!root) return vector<string> {};
+        vector<string> res;
+        string path = to_string(root->val);
+        dfs(root,path,res);
+        return res;
+    }
+    
+    void dfs(TreeNode *node,string path, vector<string> &res) {
+        if (!node->left && !node->right) {
+            res.push_back(path);
+            return ;
+        }
+        
+        if (node->left) {
+            dfs(node->left,path + "->" + to_string(node->left->val),res);
+        }
+        
+        if (node->right) {
+            dfs(node->right,path + "->" + to_string(node->right->val),res);
+        }
+    }
+};
+```
   
 - LeetCode 93. Restore IP Addresses Medium
   
